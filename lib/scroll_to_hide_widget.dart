@@ -17,7 +17,7 @@ class ScrollToHideWidget extends StatefulWidget {
 }
 
 class _ScrollToHideWidgetState extends State<ScrollToHideWidget> {
-  bool isVisible = true;
+  final ValueNotifier<bool> isVisible = ValueNotifier(true);
 
   @override
   void initState() {
@@ -33,11 +33,7 @@ class _ScrollToHideWidgetState extends State<ScrollToHideWidget> {
 
   void _listen() {
     final direction = widget.scrollController.position.userScrollDirection;
-    // if (widget.scrollController.position.pixels >= 200) {
-    //   _hide();
-    // } else {
-    //   _show();
-    // }
+
     if (direction == ScrollDirection.forward) {
       _show();
     } else if (direction == ScrollDirection.reverse) {
@@ -46,19 +42,26 @@ class _ScrollToHideWidgetState extends State<ScrollToHideWidget> {
   }
 
   void _show() {
-    if (!isVisible) setState(() => isVisible = true);
+    if (!isVisible.value) {
+      isVisible.value = true;
+    }
   }
 
   void _hide() {
-    if (isVisible) setState(() => isVisible = false);
+    if (isVisible.value) {
+      isVisible.value = false;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: widget.duration,
-      height: isVisible ? kBottomNavigationBarHeight : 0,
-      child: Wrap(children: [widget.child]),
+    return ValueListenableBuilder(
+      valueListenable: isVisible,
+      builder: (context, isVisibleValue, child) => AnimatedContainer(
+        duration: widget.duration,
+        height: isVisibleValue ? kBottomNavigationBarHeight : 0,
+        child: Wrap(children: [widget.child]),
+      ),
     );
   }
 }
